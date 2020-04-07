@@ -5,7 +5,13 @@
 	<div class="col-sm-6">
 		<h1 class="monospace">
 			{{ artist.name }}
-		</h1>
+        </h1>
+        <button data_id={{artist.id}} class="delete_item_artist">
+            &cross;
+        </button>
+        <a href="/artists/{{artist.id}}/edit" data_id={{artist.id}} class="edit_item">
+            &#9998;
+        </a>
 		<p class="subtitle">
 			ID: {{ artist.id }}
 		</p>
