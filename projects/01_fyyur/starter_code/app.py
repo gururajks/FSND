@@ -195,7 +195,7 @@ def search_venues():
     #     }]
     # }
     search_string = f"%{request.form['search_term']}%"
-    venue_search = Venue.query.filter(Venue.name.like(search_string))
+    venue_search = Venue.query.filter(Venue.name.ilike(search_string))
     response = {}
     response["data"] = venue_search.all()
     response["count"] = venue_search.count()
@@ -389,7 +389,7 @@ def search_artists():
     # }
     response = {}
     like_search_term = f"%{request.form['search_term']}%"
-    artists = Artist.query.filter(Artist.name.like(like_search_term))
+    artists = Artist.query.filter(Artist.name.ilike(like_search_term))
     response['data'] = artists.all()
     response['count'] = artists.count()
     return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
