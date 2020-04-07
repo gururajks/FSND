@@ -5,7 +5,13 @@
 	<div class="col-sm-6">
 		<h1 class="monospace">
 			{{ venue.name }}
-		</h1>
+        </h1>
+        <button data_id={{venue.id}} class="delete_item_venue">
+            &cross;
+        </button>
+        <a href="/venues/{{venue.id}}/edit" data_id={{venue.id}} class="edit_item">
+            &#9998;
+        </a>
 		<p class="subtitle">
 			ID: {{ venue.id }}
 		</p>
