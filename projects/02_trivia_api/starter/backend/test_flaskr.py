@@ -13,7 +13,7 @@ class TriviaTestCase(unittest.TestCase):
     def setUp(self):
         """Define test variables and initialize app."""
         self.app = create_app()
-        self.client = self.app.test_client
+        self.client = self.app.test_client()
         self.database_name = "trivia_test"
         self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
@@ -33,7 +33,7 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
-    def test_get_all_category():
+    def test_get_all_category(self):
         res = self.client.get('/categories')
         self.assertEqual(res.status_code, 200)
         expected_response = {
@@ -69,7 +69,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(body, expected_response)
 
 
-    def test_get_questions():
+    def test_get_questions(self):
         """
         Test the GET /questions API endpoint which is expected to be paginated at 10 questions / page
         """
@@ -88,14 +88,17 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client.get('/questions?page=1')
         self.assertEqual(res.status_code, 200)
         body = json.loads(res.data)
-        self.assertEqual(body, expected_response)
+        self.assertEqual(body["questions"][0]["answer"], expected_response["questions"][0]["answer"])
+        self.assertEqual(body["questions"][0]["category"], expected_response["questions"][0]["category"])
+        self.assertEqual(body["questions"][0]["id"], expected_response["questions"][0]["id"])
+        self.assertEqual(body["questions"][0]["question"], expected_response["questions"][0]["question"])
 
-    def test_add_question():
+    def test_add_question(self):
         """
         Test the POST /questions/ endpoint which adds a new question
         """
         expected_response = {
-            "id": 1
+            "id": 1,
             "message": "Added",
             "success": True
         }
@@ -108,25 +111,40 @@ class TriviaTestCase(unittest.TestCase):
         headers = {
             'Content-Type': 'application/json'
         }
-        res = self.client.post(f'/questions', data=question, headers=headers)
+        res = self.client.post('/questions', data=json.dumps(question), headers=headers)
+        body = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(body["success"], True)
         self.assertEqual(body["message"], "Added")
-        return body.get("id")
+        self.new_id = body.get("id")
 
-    def test_delete_question():
-        """
+    def test_delete_question(self):
+        """ 
         Test the DELETE /questions/<question_id> endpoint which deletes a specific question
         """
         expected_response = {
             "message": "Deleted",
             "success": True
         }
-        question_id = test_add_question()
-        res = self.client.delete(f'/questions/{question_id}')
+        question = {
+            "answer": "Maya Angelou",
+            "category": 4,
+            "difficulty": 2,
+            "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        res = self.client.post('/questions', data=json.dumps(question), headers=headers)
+        body = json.loads(res.data)
+        new_id = body.get("id") 
+        res = self.client.delete(f'/questions/{new_id}')
         self.assertEqual(res.status_code, 200)
         body = json.loads(res.data)
         self.assertEqual(body, expected_response) 
+
+
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

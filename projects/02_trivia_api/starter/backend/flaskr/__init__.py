@@ -28,7 +28,7 @@ def create_app(test_config=None):
     
     def _get_all_categories():
         categories = Category.query.all()
-        formatted_categories = [category.type for category in categories]
+        formatted_categories = [category.format() for category in categories]
         return formatted_categories
     
     '''
@@ -66,9 +66,9 @@ def create_app(test_config=None):
         formatted_questions = [question.format() for question in questions]
         return jsonify({
             "questions": formatted_questions[start: end],
-            "totalQuestions": len(formatted_questions),
+            "total_questions": len(formatted_questions),
             "categories": formatted_categories,
-            "currentCategory": "Sports",
+            "current_category": "Sports",
             "success": True
         }) 
     '''
@@ -108,6 +108,7 @@ def create_app(test_config=None):
     '''
     @app.route('/questions', methods=['POST'])
     def create_new_question():
+        id = None
         try:
             body = request.get_json()
             question = Question(question=body["question"],
@@ -116,6 +117,7 @@ def create_app(test_config=None):
                                 category=body["category"])
             db.session.add(question)
             db.session.commit()
+            id = question.id
         except KeyError as e:
             db.session.close()
             abort(400)
@@ -125,7 +127,7 @@ def create_app(test_config=None):
             abort(500)        
         db.session.close()
         return jsonify({
-            "id": question.id,
+            "id": id,
             "message" : "Added",
             "success": True
         })
@@ -140,7 +142,17 @@ def create_app(test_config=None):
     only question that include that string within their question. 
     Try using the word "title" to start. 
     '''
-
+    @app.route('/search', methods=['POST'])
+    def search_question():
+        body = request.get_json()
+        search_term = "%{}%".format(body["searchTerm"])
+        questions = Question.query.filter(Question.question.ilike(search_term)).all()
+        formatted_questions = [question.format() for question in questions]
+        return jsonify({
+            "questions": formatted_questions,
+            "total_questions": len(formatted_questions),
+            "current_category": "Sports"
+        })
     '''
     @TODO: 
     Create a GET endpoint to get questions based on category. 
@@ -155,9 +167,9 @@ def create_app(test_config=None):
         formatted_questions = [question.format() for question in questions]
         formatted_categories = _get_all_categories()
         return jsonify({
-            "questions": formatted_questions[start: end],
+            "questions": formatted_questions,
             "totalQuestions": len(formatted_questions),
-            "currentCategory": "Sports",
+            "currentCategory": category_id,
             "success": True
         }) 
 
@@ -186,7 +198,13 @@ def create_app(test_config=None):
             "message": "Server Error"
         }), 500
 
-
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "Bad Request, please check the body and the url"
+        }), 400 
 
 
     return app
