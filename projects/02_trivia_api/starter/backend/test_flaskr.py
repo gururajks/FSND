@@ -68,7 +68,6 @@ class TriviaTestCase(unittest.TestCase):
         body = json.loads(res.data)
         self.assertEqual(body, expected_response)
 
-
     def test_get_questions(self):
         """
         Test the GET /questions API endpoint which is expected to be paginated at 10 questions / page
@@ -93,32 +92,31 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(body["questions"][0]["id"], expected_response["questions"][0]["id"])
         self.assertEqual(body["questions"][0]["question"], expected_response["questions"][0]["question"])
 
-    def test_add_question(self):
+    def test_get_question_by_category(self):
         """
-        Test the POST /questions/ endpoint which adds a new question
+        Test the GET /category<int:category_id>/questions which gets all the questions for a particular category        
         """
         expected_response = {
-            "id": 1,
-            "message": "Added",
+            "questions": [
+                {
+                    "answer": "Maya Angelou",
+                    "category": 4,
+                    "difficulty": 2,
+                    "id": 5,
+                    "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+                }
+            ],
             "success": True
         }
-        question = {
-            "answer": "Maya Angelou",
-            "category": 4,
-            "difficulty": 2,
-            "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
-        }
-        headers = {
-            'Content-Type': 'application/json'
-        }
-        res = self.client.post('/questions', data=json.dumps(question), headers=headers)
-        body = json.loads(res.data)
+        res = self.client.get('/categories/4/questions')
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(body["success"], True)
-        self.assertEqual(body["message"], "Added")
-        self.new_id = body.get("id")
+        body = json.loads(res.data)
+        self.assertEqual(body["questions"][0]["answer"], expected_response["questions"][0]["answer"])
+        self.assertEqual(body["questions"][0]["category"], expected_response["questions"][0]["category"])
+        self.assertEqual(body["questions"][0]["id"], expected_response["questions"][0]["id"])
+        self.assertEqual(body["questions"][0]["question"], expected_response["questions"][0]["question"])
 
-    def test_delete_question(self):
+    def test_add_delete_question(self):
         """ 
         Test the DELETE /questions/<question_id> endpoint which deletes a specific question
         """
@@ -136,14 +134,79 @@ class TriviaTestCase(unittest.TestCase):
             'Content-Type': 'application/json'
         }
         res = self.client.post('/questions', data=json.dumps(question), headers=headers)
+        self.assertEqual(res.status_code, 200)
         body = json.loads(res.data)
-        new_id = body.get("id") 
+        self.assertEqual(body["success"], True)
+        self.assertEqual(body["message"], "Added") 
+        new_id = body.get("id")
         res = self.client.delete(f'/questions/{new_id}')
         self.assertEqual(res.status_code, 200)
         body = json.loads(res.data)
         self.assertEqual(body, expected_response) 
 
+    def test_search(self):
+        """
+        Test the POST /search endpoint that searches all the questions for the substring provided
+        """
+        expected_response = {
+            "questions": [
+                {
+                    "answer": "Maya Angelou",
+                    "category": 4,
+                    "difficulty": 2,
+                    "id": 5,
+                    "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+                }
+            ],
+            "success": True
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        body = {
+            "searchTerm": "auto"
+        }
+        res = self.client.post('/search', data=json.dumps(body), headers=headers)
+        self.assertEqual(res.status_code, 200)
+        body = json.loads(res.data)
+        self.assertEqual(body["questions"][0]["answer"], expected_response["questions"][0]["answer"])
+        self.assertEqual(body["questions"][0]["category"], expected_response["questions"][0]["category"])
+        self.assertEqual(body["questions"][0]["id"], expected_response["questions"][0]["id"])
+        self.assertEqual(body["questions"][0]["question"], expected_response["questions"][0]["question"]) 
 
+    
+    def test_play(self):
+        """
+        Test the POST /quizzes endpoint that plays the trivia game
+        it should give a random question and should not repeat questions
+        """
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        body = {
+            "previous_questions": [],
+            "quiz_category": {
+                "type": "Sports",
+                "id": '6',
+            }
+        }
+        res = self.client.post('/quizzes', data=json.dumps(body), headers=headers)
+        self.assertEqual(res.status_code, 200)
+        # response_body = json.loads(res.data)
+        # print(response_body)
+        # current_question_id = response_body["question"]["id"]
+        # body = {
+        #     "previous_questions": [current_question_id],
+        #     "quiz_category": {
+        #         "type": "Science",
+        #         "id": '1'
+        #     }
+        # }
+        # res = self.client.post('/quizzes', data=json.dumps(body), headers=headers)
+        # self.assertEqual(res.status_code, 200)
+        # response_body = json.loads(res.data)
+        # next_question_id = response_body["question"]["id"]
+        # self.assertNotEqual(current_question_id, next_question_id)
 
 
 # Make the tests conveniently executable
