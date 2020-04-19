@@ -37,7 +37,8 @@ def create_app(test_config=None):
     def get_all_questions():
         questions = Question.query.all()
         formatted_categories = _get_all_categories()
-        page = int(request.args.get('page'))
+        page = request.args.get('page')
+        page = 1 if page is None else int(page)
         start = (page - 1) * 10
         end = start + 10
         formatted_questions = [question.format() for question in questions]
@@ -97,15 +98,18 @@ def create_app(test_config=None):
         
     @app.route('/search', methods=['POST'])
     def search_question():
-        body = request.get_json()
-        search_term = "%{}%".format(body["searchTerm"])
-        questions = Question.query.filter(Question.question.ilike(search_term)).all()
-        formatted_questions = [question.format() for question in questions]
-        return jsonify({
-            "questions": formatted_questions,
-            "total_questions": len(formatted_questions),
-            "current_category": "Sports"
-        })
+        try:
+            body = request.get_json()
+            search_term = "%{}%".format(body["searchTerm"])
+            questions = Question.query.filter(Question.question.ilike(search_term)).all()
+            formatted_questions = [question.format() for question in questions]
+            return jsonify({
+                "questions": formatted_questions,
+                "total_questions": len(formatted_questions),
+                "current_category": "Sports"
+            })
+        except (TypeError, ValueError, KeyError) as e:
+            abort(400)
     
     @app.route('/categories/<int:category_id>/questions')
     def get_question_by_category(category_id):
