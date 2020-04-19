@@ -122,7 +122,7 @@ Eg: `curl http://localhost:3000/categories`
 ```
 
 ### `GET /questions`
-Gets all the questions that are available and is paginated. 
+Gets all the questions that are available and is paginated. It is restricted to 10 questions per page
 Use page parameter for the page
 ##### Request
 
@@ -161,7 +161,7 @@ Delete a specific question given its question id
 
 ##### Request
 
-Eg: `curl -X DELETE http://localhost:3000/questions?1`
+Eg: `curl -X DELETE http://localhost:3000/questions`
 
 ##### Response
 ```
@@ -179,7 +179,7 @@ Create a new question with the given details as part of the body
 Required Fields:
 | Fields   |      Type      |
 |----------|:-------------:|
-| Answer |  string |
+| answer |  string |
 | category |    integer   |
 | difficulty | integer |
 | question | string |
@@ -207,7 +207,6 @@ Eg:
 
 It searches and displays all the questions that have a substring equal to the given string
 ##### Request
-Searches 
 
 Required Fields:
 | Fields   |      Type      |
