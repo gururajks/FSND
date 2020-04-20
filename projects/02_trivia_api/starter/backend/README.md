@@ -269,12 +269,12 @@ Required Fields:
 Eg:
 ```
 {
-  "question": {
-    "answer": "Mona Lisa", 
-    "category": 2, 
-    "difficulty": 3, 
-    "id": 17, 
-    "question": "La Giaconda is better known as what?"
+    "question": {
+        "answer": "Mona Lisa", 
+        "category": 2, 
+        "difficulty": 3, 
+        "id": 17, 
+        "question": "La Giaconda is better known as what?"
   }
 }
 ``` 
@@ -287,9 +287,9 @@ Eg:
 Response
 ```
 {
-  "error": 400,
-  "message": "Bad Request, please check the body and the url",
-  "success": false
+    "error": 400,
+    "message": "Bad Request, please check the body and the url",
+    "success": false
 }
 ```
 
@@ -310,9 +310,19 @@ Response
 Response
 ```
 {
-  "error": 404,
-  "message": "Resouce not Found!"
-  "success": false
+    "error": 404,
+    "message": "Resouce not Found!"
+    "success": false
 }
 ```
 
+##### `405 - Method Not Allowed`
+
+Response
+```
+{
+    "success": False,
+    "error": 405,
+    "message": "Method not allowed. Please check documentation"
+}
+```

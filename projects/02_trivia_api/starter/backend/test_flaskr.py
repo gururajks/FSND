@@ -144,6 +144,32 @@ class TriviaTestCase(unittest.TestCase):
         body = json.loads(res.data)
         self.assertEqual(body, expected_response) 
 
+
+    def test_add_question_fail(self):
+        """ 
+        Test the error condition DELETE /questions/<question_id> endpoint which deletes a specific question
+        """        
+        question = {            
+            "category": 4,
+            "difficulty": 2,
+            "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+        }
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        res = self.client.post('/questions', data=json.dumps(question), headers=headers)
+        self.assertEqual(res.status_code, 400)
+        body = json.loads(res.data)
+        self.assertEqual(body["success"], False)
+        self.assertEqual(body["message"], "Bad Request, please check the body and the url") 
+        
+
+    def test_delete_question_fail(self):
+        res = self.client.delete(f'/questions')
+        self.assertEqual(res.status_code, 405)
+        body = json.loads(res.data)
+        self.assertEqual(body["message"], "Method not allowed. Please check documentation") 
+
     def test_search(self):
         """
         Test the POST /search endpoint that searches all the questions for the substring provided
@@ -174,7 +200,18 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(body["questions"][0]["id"], expected_response["questions"][0]["id"])
         self.assertEqual(body["questions"][0]["question"], expected_response["questions"][0]["question"]) 
 
-    
+    def test_fail_search(self):        
+        body = {}
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        res = self.client.post('/search', data=json.dumps(body), headers=headers)
+        # missing body with the "searchTerm"
+        self.assertEqual(res.status_code, 400)
+        res = self.client.get('/search', data=json.dumps(body), headers=headers)
+        # method not allowed
+        self.assertEqual(res.status_code, 405)
+
     def test_play(self):
         """
         Test the POST /quizzes endpoint that plays the trivia game
@@ -192,21 +229,19 @@ class TriviaTestCase(unittest.TestCase):
         }
         res = self.client.post('/quizzes', data=json.dumps(body), headers=headers)
         self.assertEqual(res.status_code, 200)
-        # response_body = json.loads(res.data)
-        # print(response_body)
-        # current_question_id = response_body["question"]["id"]
-        # body = {
-        #     "previous_questions": [current_question_id],
-        #     "quiz_category": {
-        #         "type": "Science",
-        #         "id": '1'
-        #     }
-        # }
-        # res = self.client.post('/quizzes', data=json.dumps(body), headers=headers)
-        # self.assertEqual(res.status_code, 200)
-        # response_body = json.loads(res.data)
-        # next_question_id = response_body["question"]["id"]
-        # self.assertNotEqual(current_question_id, next_question_id)
+
+
+    def test_fail_play(self):
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        # missing quiz body in the test
+        body = {
+            "previous_questions": []
+        }
+        res = self.client.post('/quizzes', data=json.dumps(body), headers=headers)
+        # bad request 
+        self.assertEqual(res.status_code, 400)
 
 
 # Make the tests conveniently executable
