@@ -85,14 +85,20 @@ def check_permissions(permission, payload):
                 'code': 'invalid_permissions',
                 'description': 'Permissions not found'
             }, 401)
+
         if permission not in payload["permissions"]:
+            print(f"payload: {payload},   permission: {permission}")
             raise AuthError({
                 'code': 'invalid_permissions',
                 'description': 'Request is not authorized due to permissions'
             }, 401)
+    except AuthError as a:
+        raise
     except Exception as e:
-        print(e)
-        abort(401)
+        raise AuthError({
+            'code': 'unknown_error',
+            'description': 'Unknown error while checking permissions'
+        }, 422)
 
 
 '''
@@ -130,6 +136,7 @@ def verify_decode_jwt(token):
                 'n': key['n'],
                 'e': key['e']
             }
+
     if rsa_key:
         try:
             payload = jwt.decode(
@@ -163,8 +170,8 @@ def verify_decode_jwt(token):
             }, 400)
     raise AuthError({
         'code': 'invalid_header',
-                'description': 'Unable to find the appropriate key.'
-    }, 400)
+                'description': 'Unable to find the appropriate key or No permission'
+    }, 401)
 
 
 '''

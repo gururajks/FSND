@@ -113,13 +113,11 @@ def update_drinks(drink_id):
         if 'recipe' in body:
             drink.recipe = json.dumps(body['recipe'])
         drink.update()
-    except KeyError, ValueError as e:
-        abort(400)
     except Exception as e:
         abort(500)
     return jsonify({
         "success": True,
-        "drinks": drink.long()
+        "drinks": [drink.long()]
     })
 
 
